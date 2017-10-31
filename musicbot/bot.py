@@ -8,6 +8,9 @@ import aiohttp
 import discord
 import asyncio
 import traceback
+import requests
+import atexit
+from git import Repo
 
 from discord import utils
 from discord.object import Object
@@ -21,6 +24,7 @@ from textwrap import dedent
 from datetime import timedelta
 from random import choice, shuffle
 from collections import defaultdict
+from os import getcwd
 
 from musicbot.playlist import Playlist
 from musicbot.player import MusicPlayer
@@ -94,6 +98,22 @@ class MusicBot(discord.Client):
         super().__init__()
         self.aiosession = aiohttp.ClientSession(loop=self.loop)
         self.http.user_agent += ' MusicBot/%s' % BOTVERSION
+
+
+    def exit_handler():
+        repo_dir = "musicbot"
+        repo = Repo(repo_dir)
+        file_list = [
+            'musicbot/fromGit.txt'
+        ]
+        commit_message = "Added auto update for database."
+        repo.index.add(file_list)
+        repo.index.commit(commit_message)
+        origin = repo.remote('origin')
+        origin.push()
+
+    atexit.register(exit_handler)
+
 
     # TODO: Add some sort of `denied` argument for a message to send when someone else tries to use it
     def owner_only(func):
@@ -765,6 +785,15 @@ class MusicBot(discord.Client):
 
         Kill yourself
         """
+
+        remoteFile = "https://raw.githubusercontent.com/darkdread/MusicBot/lmao/musicbot/test.txt"
+        cur_dir = os.path.dirname(__file__)
+
+        file = requests.get(remoteFile)
+        with open(cur_dir + "/fromGit.txt", "w", encoding='utf-8') as f:
+            data = f
+
+            data.write(file.text)
 
         return Response("ZULUL", delete_after=20)
 			
