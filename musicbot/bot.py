@@ -758,6 +758,16 @@ class MusicBot(discord.Client):
 
             return Response(helpmsg, reply=True, delete_after=60)
 
+    async def cmd_lmao(self):
+        """
+        Usage:
+            {command_prefix}lmao
+
+        Kill yourself
+        """
+
+        return Response("ZULUL", delete_after=20)
+			
     async def cmd_remove(self, id, player):
         """
         Usage:
@@ -824,9 +834,9 @@ class MusicBot(discord.Client):
                 return Response("Player is not playing", 20)
         songData = player.check_play_count(id)
         if (not songData == None):
-            return Response("Song: %s has been played %sx times :ok_hand:" % (songData[0], songData[1]), 20)
+            return Response("Song: %s has been played %sx times :ok_hand:" % (songData[0], songData[1]), delete_after=20)
         else:
-            return Response("Song: %s is not found! :sun_with_face:" % (id), 20)
+            return Response("Song: %s is not found! :sun_with_face:" % (id), delete_after=20)
 
     async def cmd_requeuesong(self, player):
         """
