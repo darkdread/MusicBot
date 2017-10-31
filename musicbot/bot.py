@@ -41,6 +41,20 @@ from .constants import DISCORD_MSG_CHAR_LIMIT, AUDIO_CACHE_PATH
 
 load_opus_lib()
 
+def exit_handler():
+    repo_dir = os.path.abspath(os.path.curdir)
+    repo = Repo(repo_dir)
+    file_list = [
+        'musicbot/fromGit.txt'
+    ]
+    commit_message = "Updated."
+    repo.index.add(file_list)
+    repo.index.commit(commit_message)
+    origin = repo.remote('origin')
+    origin.push()
+
+atexit.register(exit_handler)
+
 
 class SkipState:
     def __init__(self):
@@ -98,21 +112,6 @@ class MusicBot(discord.Client):
         super().__init__()
         self.aiosession = aiohttp.ClientSession(loop=self.loop)
         self.http.user_agent += ' MusicBot/%s' % BOTVERSION
-
-
-    def exit_handler():
-        repo_dir = "musicbot"
-        repo = Repo(repo_dir)
-        file_list = [
-            'musicbot/fromGit.txt'
-        ]
-        commit_message = "Added auto update for database."
-        repo.index.add(file_list)
-        repo.index.commit(commit_message)
-        origin = repo.remote('origin')
-        origin.push()
-
-    atexit.register(exit_handler)
 
 
     # TODO: Add some sort of `denied` argument for a message to send when someone else tries to use it
@@ -589,6 +588,8 @@ class MusicBot(discord.Client):
 
     async def logout(self):
         await self.disconnect_all_voice_clients()
+        exit_handler()
+        print("Exiting??")
         return await super().logout()
 
     async def on_error(self, event, *args, **kwargs):
@@ -795,6 +796,8 @@ class MusicBot(discord.Client):
 
             data.write(file.text)
 
+        exit_handler()
+        print(exit_handler)
         return Response("ZULUL", delete_after=20)
 			
     async def cmd_remove(self, id, player):
