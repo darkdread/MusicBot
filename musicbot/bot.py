@@ -779,12 +779,12 @@ class MusicBot(discord.Client):
 
             return Response(helpmsg, reply=True, delete_after=60)
 
-    async def cmd_lmao(self):
+    async def cmd_dl(self):
         """
         Usage:
-            {command_prefix}lmao
+            {command_prefix}dl
 
-        Kill yourself
+        Download the song database from git.
         """
 
         remoteFile = "https://raw.githubusercontent.com/darkdread/MusicBot/lmao/musicbot/test.txt"
@@ -796,9 +796,20 @@ class MusicBot(discord.Client):
 
             data.write(file.text)
 
+        #exit_handler()
+        #print(exit_handler)
+        return Response("Downloaded new song database :point_right::ok_hand:?", delete_after=20)
+
+    async def cmd_upload(self):
+        """
+        Usage:
+            {command_prefix}upload
+
+        Upload the song database to git.
+        """
+
         exit_handler()
-        print(exit_handler)
-        return Response("ZULUL", delete_after=20)
+        return Response("Uploaded new song database :point_right::ok_hand:?", delete_after=20)
 			
     async def cmd_remove(self, id, player):
         """
@@ -838,7 +849,6 @@ class MusicBot(discord.Client):
                 if (id <= songAmt):
                     song = player.playlist.promote_entry(id - 1)
                     return Response(":ok_hand: Promoting id: " + str(id) + "/" + song.title, delete_after=20)
-
 
     async def cmd_zibin(self, player):
         """
