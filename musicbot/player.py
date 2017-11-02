@@ -146,6 +146,9 @@ class MusicPlayer(EventEmitter):
         else:
             self.repeatState = RepeatState.REPEAT
 
+    @property 
+    def remove_after(self):
+        return self.skipRepeat == True
 
     @volume.setter
     def volume(self, value):
@@ -159,9 +162,12 @@ class MusicPlayer(EventEmitter):
 
     def skip(self):
         if (self.is_repeat):
-            self.skipRepeat = True;
+            self.skipRepeat = True
 
         self._kill_current_player()
+
+    def removeafter(self):
+        self.skipRepeat = True
 
     def stop(self):
         self.state = MusicPlayerState.STOPPED
@@ -299,14 +305,14 @@ class MusicPlayer(EventEmitter):
         entry = self._current_entry
         self.increase_play_count()
 
-        if (self.is_repeat) and (not self.skipRepeat):
+        if (self.is_repeat and not self.skipRepeat):
             #print("Looping current song \"%s\"" % self._current_entry.url)
             #songURL = "https://www.youtube.com/watch?v=" + self._current_entry.url[20:31]
 
             #add entry to last, then push to first.
             self.playlist._add_entry(entry)
             self.playlist._promote_last()
-        elif (self.is_all):
+        elif (self.is_all and not self.skipRepeat):
             self.playlist._add_entry(entry)
         else:
             self.skipRepeat = False

@@ -811,6 +811,21 @@ class MusicBot(discord.Client):
         exit_handler()
         return Response("Uploaded new song database :point_right::ok_hand:?", delete_after=20)
 			
+    async def cmd_removeafter(self, player):
+        """
+        Usage:
+            {command_prefix}removeafter
+
+        Remove the song after it finishes.
+        """
+
+        if (not player.remove_after):
+            if (player.is_repeat or player.is_all):
+                player.removeafter()
+                return Response(":sun_with_face: :dagger: %s will be removed after it finishes playing" % player.current_entry.title, delete_after=20)
+        else:
+            return Response(":sun_with_face: :dagger: %s will be removed after it finishes playing" % player.current_entry.title, delete_after=20)
+
     async def cmd_remove(self, id, player):
         """
         Usage:
