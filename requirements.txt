@@ -3,4 +3,5 @@ youtube_dl
 pip
 requests
 GitPython
+lxml
 cffi==1.6.0; sys_platform == 'win32'
