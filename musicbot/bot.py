@@ -778,6 +778,15 @@ class MusicBot(discord.Client):
             helpmsg += "https://github.com/SexualRhinoceros/MusicBot/wiki/Commands-list"
 
             return Response(helpmsg, reply=True, delete_after=60)
+	
+    async def cmd_clarencegoh(self):
+        """
+        Usage:
+            {command_prefix}clarencegoh
+
+        My name is Clarence Goh and I am an engineer from Singapore Polytechnic.
+        """
+        return Response("My name is Clarence Goh and I am an engineer from Singapore Polytechnic.", delete_after=20)
 
     async def cmd_dl(self):
         """
