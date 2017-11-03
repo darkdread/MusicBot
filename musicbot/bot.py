@@ -11,6 +11,8 @@ import traceback
 import requests
 import atexit
 from git import Repo
+from urllib.request import urlopen
+import lxml.html
 
 from discord import utils
 from discord.object import Object
@@ -778,6 +780,26 @@ class MusicBot(discord.Client):
             helpmsg += "https://github.com/SexualRhinoceros/MusicBot/wiki/Commands-list"
 
             return Response(helpmsg, reply=True, delete_after=60)
+	
+    async def cmd_image(self, message):
+        """
+        Usage:
+            {command_prefix}image [title]
+
+        Displays the first image from Google search.
+        """
+        html = lxml.html.parse(urlopen("https://images.google.com")).getroot()
+        print(html.text_content())
+        return Response("My name is Clarence Goh and I am an engineer from Singapore Polytechnic.", delete_after=20)
+
+    async def cmd_clarencegoh(self):
+        """
+        Usage:
+            {command_prefix}clarencegoh
+
+        My name is Clarence Goh and I am an engineer from Singapore Polytechnic.
+        """
+        return Response("My name is Clarence Goh and I am an engineer from Singapore Polytechnic.", delete_after=20)
 
     async def cmd_dl(self):
         """
@@ -816,7 +838,7 @@ class MusicBot(discord.Client):
         Usage:
             {command_prefix}removeafter
 
-        Remove the song after it finishes.
+        Removes the song after it finishes.
         """
 
         if (not player.remove_after):
