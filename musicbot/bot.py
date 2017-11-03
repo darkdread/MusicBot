@@ -816,7 +816,7 @@ class MusicBot(discord.Client):
         Usage:
             {command_prefix}removeafter
 
-        Remove the song after it finishes.
+        Removes the song after it finishes.
         """
 
         if (not player.remove_after):
