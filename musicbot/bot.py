@@ -11,7 +11,6 @@ import traceback
 import requests
 import atexit
 from git import Repo
-from urllib.request import urlopen
 import lxml.html
 
 from discord import utils
@@ -102,6 +101,8 @@ class MusicBot(discord.Client):
         self.exit_signal = None
         self.init_ok = False
         self.cached_client_id = None
+
+        self.cmd_image("a")
 
         if not self.autoplaylist:
             print("Warning: Autoplaylist is empty, disabling.")
@@ -780,6 +781,32 @@ class MusicBot(discord.Client):
             helpmsg += "https://github.com/SexualRhinoceros/MusicBot/wiki/Commands-list"
 
             return Response(helpmsg, reply=True, delete_after=60)
+
+    async def cmd_lol(self, voice_channel):
+        """
+        Usage:
+            {command_prefix}lol
+
+        LOOOOOOOOOOOOOOOOOOOOOOOOOOOOL 4HEad.
+        """
+
+        user = voice_channel.server.me
+        toMute = not user.voice.self_mute
+        while(True):
+            await self.mute_voice_client(voice_channel, toMute)
+        
+    async def cmd_test(self):
+        """
+        Usage:
+            {command_prefix}mikealaisshit
+
+        The bot agrees.
+        """
+
+        return Response("I agree.", delete_after = 20)
+
+    def omegalul(self):
+        return
 	
     async def cmd_image(self, message):
         """
@@ -788,8 +815,25 @@ class MusicBot(discord.Client):
 
         Displays the first image from Google search.
         """
-        html = lxml.html.parse(urlopen("https://images.google.com")).getroot()
-        print(html.text_content())
+        
+        page = requests.get("http://images.google.com")
+        html = lxml.html.fromstring(page.content.decode("utf-8", "ignore"))
+        search_bar = html.xpath('/html/body')
+        test = ""
+        test = str(lxml.html.etree.tostring(html, encoding = 'unicode', pretty_print = True))
+        with open(os.curdir + "zzz.txt", "w") as f:
+            data = f
+            data.write(str(page.content))
+        text = search_bar.get_element_by_id('lst-ib')
+        print(text.text)
+        
+
+        page = requests.get("http://econpy.pythonanywhere.com/ex/001.html")
+        html = lxml.html.fromstring(page.content)
+        search_bar = html.xpath('/html/body/div[4]/div')[0]
+        print(search_bar.text)
+        #print("{} lmao {}".format(len(search_bar), search_bar[0]))
+
         return Response("My name is Clarence Goh and I am an engineer from Singapore Polytechnic.", delete_after=20)
 
     async def cmd_clarencegoh(self):
