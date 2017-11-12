@@ -1,7 +1,8 @@
 {
   "ExpandedNodes": [
     "",
-    "\\musicbot"
+    "\\musicbot",
+    "\\playlists"
   ],
   "SelectedNode": "\\musicbot\\bot.py",
   "PreviewInSolutionExplorer": true

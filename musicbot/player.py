@@ -243,13 +243,13 @@ class MusicPlayer(EventEmitter):
             return False
         script_dir = os.path.dirname(__file__)
         songTitle = self.current_entry.title
-        songURL = self.current_entry.url
+        songURL = self.current_entry.filename
         splitter = "=:="
 
         #read current file and store data into oldFile
         data = open(script_dir + "/test.txt", "r", encoding='utf-8')
         oldFile = data.readlines()
-
+        
         #rewrite current file using oldFile as reference
         with open(script_dir + "/test.txt", "w", encoding='utf-8') as f:
             newFile = f
@@ -414,7 +414,8 @@ class MusicPlayer(EventEmitter):
                 # I need to add ytdl hooks
                 self.state = MusicPlayerState.PLAYING
                 self._current_entry = entry
-                self._current_entry.url = entry.filename
+                self._current_entry.filename = entry.filename
+                self._current_entry.url = entry.url
 
                 self._current_player.start()
                 self.emit('play', player=self, entry=entry)

@@ -1,4 +1,5 @@
 import os
+import errno
 import sys
 import time
 import shlex
@@ -10,6 +11,8 @@ import asyncio
 import traceback
 import requests
 import atexit
+import json
+import collections
 from git import Repo
 import lxml.html
 
@@ -807,7 +810,185 @@ class MusicBot(discord.Client):
 
     def omegalul(self):
         return
+
+    def isBlank(self, myString):
+        return not (myString and myString.strip())
+
+    async def cmd_saveplaylist(self, message, id, player):
+        """
+        Usage:
+            {command_prefix}saveplaylist [name]
+
+        Saves the current queue to a playlist.
+        """
+
+        playlist_name = str(id)
+        queue = collections.deque(player.playlist.entries)
+        if (player.current_entry):
+            queue.appendleft(player.current_entry)
+        for m in queue:
+            print(m)
+        if self.isBlank(playlist_name):
+            return Response("Playlist must have a name.", delete_after = 20)
+        elif len(queue) == 0:
+            return Response("Queue must contain songs.", delete_after = 20)
+        server_name = message.server.name
+        playlist_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "playlists")
+        file_name = server_name + ".txt"
+        file_path = os.path.join(playlist_dir, file_name)
+
+        try:
+            os.makedirs(playlist_dir)
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise
+
+        #if there's no playlist saved for the server
+        if (not os.path.exists(file_path)):
+            with open(file_path, "w", encoding = 'utf-8') as f:
+                data = f
+                
+                print("Created new Playlist! Path: %s" % (file_path))
+                data.close()
+
+        oldFile = open(file_path, "r", encoding='utf-8')
+        data = oldFile.readlines()
+        
+        with open(file_path, "w", encoding = 'utf-8') as f:
+            _data = f
+            _playlist_exists = False
+            _is_in_playlist = False
+
+            #loop through old file and write to new file
+            for line in data:
+                single_line = line.splitlines()[0]
+                #if there's a playlist saved with this name
+                if (not _is_in_playlist and single_line.lower() == playlist_name.lower() + " =:="):
+                    #replace playlist name with this queue
+                    print("1")
+                    _is_in_playlist = True
+                    _playlist_exists = True
+                    _data.write(line)
+                    for k in queue:
+                        _data.write(k.url + "\n")
+                    _data.write(playlist_name + " ///\n")
+                #if im looping in playlist and i found the end head
+                elif (_is_in_playlist):
+                    print(single_line.lower() + "======" + playlist_name.lower() + " ///")
+                    if (single_line.lower() == playlist_name.lower() + " ///"):
+                        print("end!")
+                        _is_in_playlist = False
+                else:
+                #not in playlist, just write
+                    _data.write(line)
+
+            #if there's no playlist saved with this name
+            if (not _playlist_exists):
+                print("2")
+                _data.write(playlist_name + " =:=\n")
+                
+                for k in queue:
+                    _data.write(k.url + "\n")
+                _data.write(playlist_name + " ///\n")
+            
+            print("Playlist saved! Path: %s" % (file_path))
+            return Response("Playlist saved!", delete_after = 20)
+
+        oldFile.close()
+
+    async def cmd_loadplaylist(self, message, id, player):
+        """
+        Usage:
+            {command_prefix}loadplaylist [name]
+
+        Loads a playlist to the current queue.
+        """
+
+        playlist_name = str(id)
+        queue = collections.deque(player.playlist.entries)
+        server_name = message.server.name
+        playlist_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "playlists")
+        file_name = server_name + ".txt"
+        file_path = os.path.join(playlist_dir, file_name)
+        if self.isBlank(playlist_name):
+            return Response("Playlist must have a name.", delete_after = 20)
+        #if there's no playlist saved for the server
+        elif (not os.path.exists(file_path)):
+            return Response("Playlist does not exist.", delete_after = 20)
+
+        with open(file_path, "r", encoding='utf-8') as f:
+            data = f
+            songs = collections.deque()
+            _playlist_found = False
+            _is_in_playlist = False
+
+            for line in data:
+                single_line = line.splitlines()[0]
+                #playlist found
+                if (playlist_name.lower() + " =:=" == single_line.lower()):
+                    _is_in_playlist = True
+                    _playlist_found = True
+                elif (_is_in_playlist):
+                    if (playlist_name.lower() + " ///" == single_line.lower()):
+                        _is_in_playlist = False
+                    else:
+                        songs.append(single_line)
+
+            if (not _playlist_found):
+                return Response("Playlist does not exist.", delete_after = 20)
+            
+        for s in songs:
+            #await player.playlist.add_entry("https://www.youtube.com/watch?v=" + s[20:31])
+            await player.playlist.add_entry(s)
+        return Response("Playlist added!", delete_after = 10)
 	
+    async def cmd_checkplaylist(self, message, id, player):
+        """
+        Usage:
+            {command_prefix}checkplaylist [name]
+
+        Display songs in a playlist.
+        """
+
+        playlist_name = str(id)
+        queue = collections.deque(player.playlist.entries)
+        server_name = message.server.name
+        playlist_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "playlists")
+        file_name = server_name + ".txt"
+        file_path = os.path.join(playlist_dir, file_name)
+        if self.isBlank(playlist_name):
+            return Response("Playlist must have a name.", delete_after = 20)
+        #if there's no playlist saved for the server
+        elif (not os.path.exists(file_path)):
+            return Response("Playlist does not exist.", delete_after = 20)
+
+        with open(file_path, "r", encoding='utf-8') as f:
+            data = f
+            songs = collections.deque()
+            _playlist_found = False
+            _is_in_playlist = False
+
+            for line in data:
+                single_line = line.splitlines()[0]
+                #playlist found
+                if (playlist_name.lower() + " =:=" == single_line.lower()):
+                    _is_in_playlist = True
+                    _playlist_found = True
+                elif (_is_in_playlist):
+                    if (playlist_name.lower() + " ///" == single_line.lower()):
+                        _is_in_playlist = False
+                    else:
+                        songs.append(single_line)
+
+            if (not _playlist_found):
+                return Response("Playlist does not exist.", delete_after = 20)
+            
+        response = ""
+        for i, s in enumerate(songs):
+            response += ("Queue: %s Link: %s\n" % (i, s))
+
+        return Response(response, delete_after = 20)
+
     async def cmd_image(self, message):
         """
         Usage:
@@ -952,7 +1133,7 @@ class MusicBot(discord.Client):
 
         if (id == "current"):
             if (player.current_entry):
-                id = player.current_entry.url[20:31]
+                id = player.current_entry.filename[20:31]
             else:
                 return Response("Player is not playing", 20)
         songData = player.check_play_count(id)
@@ -2080,7 +2261,7 @@ class MusicBot(discord.Client):
         handler = getattr(self, 'cmd_%s' % command, None)
         if not handler:
             return
-
+        
         if message.channel.is_private:
             if not (message.author.id == self.config.owner_id and command == 'joinserver'):
                 await self.send_message(message.channel, 'You cannot use this bot in private messages.')
